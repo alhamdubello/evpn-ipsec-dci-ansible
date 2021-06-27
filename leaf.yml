@@ -1,0 +1,5 @@
+---
+- hosts: leafs
+  gather_facts: true
+  roles:
+    - leaf

@@ -1,0 +1,232 @@
+---
+# vars file for leafrole
+vrf_customer: "bbcore"
+l3vni_vlan: "4018"
+l3vni_name: "vnil3-bbcore"
+l3vxlan_id: "104018"
+vlan:
+  - id: 1
+    name: default
+  - id: 2
+    name: VLAN0002
+  - id: 555
+    name: VLAN0555
+  - id: 666
+    name: UTAGGED_JUNK
+  - id: 700
+    name: VLAN0700
+  - id: 800
+    name: VDX_VROUTER_TR*
+  - id: 801
+    name: VDX_VROUTER_TR*
+  - id: 802
+    name: VDX_VROUTER_TR*
+  - id: 1001
+    name: rds-xcat
+  - id: 1002
+    name: rds-ipmi
+  - id: 1003
+    name: rds-peripheral
+  - id: 1004
+    name: rds-storage-gp*
+  - id: 1049
+    name: shared-xcat-im*
+  - id: 1050
+    name: shared-xcat
+  - id: 1051
+    name: pg-infrastruct*
+  - id: 1052
+    name: pg-peripheral
+  - id: 1053
+    name: pg-xcat-01
+  - id: 1054
+    name: pg-ipmi-01
+  - id: 1055
+    name: pg-ipoib-01
+  - id: 1056
+    name: pg-xcat-02
+  - id: 1057
+    name: pg-ipmi-02
+  - id: 1058
+    name: pg-ipoib-02
+  - id: 1059
+    name: pg-xcat-03
+  - id: 1060
+    name: pg-ipmi-03
+  - id: 1061
+    name: pg-ipoib-03
+  - id: 1500
+    name: VLAN1500
+  - id: 1501
+    name: VLAN1501
+  - id: 1502
+    name: rdnhscn172-2
+  - id: 1503
+    name: rdnhscn172-31-*
+  - id: 1504
+    name: rdnhscn172-31-*
+  - id: 1505
+    name: rdnhscn172-31-*
+  - id: 1700
+    name: VLAN1700
+  - id: 2001
+    name: RNET_1
+  - id: 2002
+    name: RNET_2
+  - id: 2003
+    name: RNET_3
+  - id: 2004
+    name: RNET_4
+  - id: 2005
+    name: RNET_5
+  - id: 2006
+    name: RNET_6
+  - id: 3001
+    name: climb-xcat
+  - id: 3002
+    name: climb-ipmi
+  - id: 3003
+    name: climb-peripher*
+  - id: 3004
+    name: climb-storage-*
+  - id: 3005
+    name: climb-bond
+  - id: 3006
+    name: climb-storage-*
+  - id: 3007
+    name: climb-vmnet
+  - id: 3008
+    name: climb-storage-*
+  - id: 3009
+    name: climb-storage-*
+  - id: 3010
+    name: climb-hscn-173
+  - id: 3012
+    name: rdn-vrouter-sy*
+  - id: 3014
+    name: clcephcovidpub
+  - id: 3015
+    name: clcephcovidcl
+  - id: 3100
+    name: rdn-peri
+  - id: 3102
+    name: rdn-ipmi
+  - id: 4001
+    name: bb2-xcat
+  - id: 4002
+    name: bb2-ipmi
+  - id: 4003
+    name: bb2-peri
+  - id: 4004
+    name: win-mgmt
+  - id: 4005
+    name: win-applicatio*
+  - id: 4007
+    name: COROSYNC-RRP
+  - id: 4011
+    name: xcat2
+  - id: 4012
+    name: ipmi2
+  - id: 4013
+    name: xcat3
+  - id: 4014
+    name: VLAN4014
+  - id: 4015
+    name: VLAN4015
+vxlan:
+  - name: VDX1VROUTER
+    id: 1801
+    vid: 801
+    gw: 192.168.81.1/24
+  - name: VDXVROUTER
+    id: 1802
+    vid: 802
+    gw: 192.168.82.1/24
+  - name: vni-rds-xcat
+    id: 11001
+    vid: 1001
+    gw: 192.168.101.1/24
+  - name: rdsstoragegp
+    id: 11004
+    vid: 1004
+    gw: 192.168.104.1/24
+  - name: shared-xcat
+    id: 11050
+    vid: 1050
+    gw: 192.168.105.1/24
+  - name: pg-xcat-01
+    id: 11053
+    vid: 1053
+    gw: 192.168.153.1/24
+  - name: pg-xcat-02
+    id: 11056
+    vid: 1056
+    gw: 192.168.156.1/24
+  - name: pg-xcat-03
+    id: 11059
+    vid: 1059
+    gw: 192.168.151.1/24
+  - name: VLAN1501
+    id: 11501
+    vid: 1501
+    gw: 147.188.172.4/25
+  - name: rdnhscn1722
+    id: 11502
+    vid: 1502
+    gw: 147.188.172.139/25
+  - name: rdnhscn17231
+    id: 11503
+    vid: 1503
+    gw: 172.31.0.9/22
+  - name: rdnhscn17231
+    id: 11504
+    vid: 1504
+    gw: 172.31.4.9/22
+  - name: rdnhscn17231
+    id: 11505
+    vid: 1505
+    gw: 172.31.8.9/22
+  - name: vni-RNET_1
+    id: 12001
+    vid: 2001
+    gw: 10.192.1.4/24
+  - name: vni-RNET_2
+    id: 12002
+    vid: 2002
+    gw: 10.192.2.4/24
+  - name: vni-RNET_3
+    id: 12003
+    vid: 2003
+    gw: 10.192.3.4/24
+  - name: vni-RNET_4
+    id: 12004
+    vid: 2004
+    gw: 10.192.4.4/24
+  - name: vni-RNET_5
+    id: 12005
+    vid: 2005
+    gw: 10.192.5.4/24
+  - name: vni-RNET_6
+    id: 12006
+    vid: 2006
+    gw: 10.192.6.4/24
+  - name: vni-rdn-peri
+    id: 13001
+    vid: 3001
+    gw: 10.30.0.77/22
+  - name: vni-bb2-xcat
+    id: 14001
+    vid: 4001
+    gw: 10.0.0.77/22
+  - name: vni-bb2-peri
+    id: 14003
+    vid: 4003
+    gw: 10.0.8.35/24
+  - name: vni-xcat2
+    id: 14011
+    vid: 4011
+    gw: 10.0.16.77/22
+  - name: vni-xcat3
+    id: 14013
+    vid: 4013
+    gw: 10.0.24.77/22

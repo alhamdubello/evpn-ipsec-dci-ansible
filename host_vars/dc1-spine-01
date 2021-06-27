@@ -1,0 +1,9 @@
+---
+# vars file for spinerole
+    hostname_sw: dc1-spine-01
+    loopback_ip: 10.0.0.1
+    asn: 65001
+    neighbors:
+      - swp1
+      - swp2
+      - swp3

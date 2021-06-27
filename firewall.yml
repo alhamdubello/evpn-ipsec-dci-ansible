@@ -1,0 +1,103 @@
+---
+- hosts: firewalls
+  gather_facts: yes
+  connection: httpapi
+  collections:
+    - fortinet.fortios
+  vars:
+   vdom: "root"
+   ansible_httpapi_use_ssl: no
+   ansible_httpapi_validate_certs: no
+   ansible_httpapi_port: 80
+   ansible_user: admin
+  tasks:
+    - name: "Configure DCI-WAN IP address"
+      fortios_system_interface:
+        system_interface:
+          description: "{{ wan_dci_description }}"
+          name: "{{ wan_dci_port }}"
+          ip: "{{ wan_dci_ip }}/{{ wan_dci_sm }}"
+          mode: static
+          allowaccess: "{{ wan_allowaccess }}"
+          status: up
+        state: "present"
+
+    - name: "Configure internal DC IP address to border switch"
+      fortios_system_interface:
+        system_interface:
+          description: "{{ border_dc_description }}"
+          name: "{{ border_dc_port }}"
+          ip: "{{  border_dc_ip }}/{{ border_dc_sm }}"
+          mode: static
+          allowaccess: "{{ border_allowaccess }}"
+          status: up
+        state: "present"
+
+    - name: "Configure and Establish IPsec VPN tunnel between dc1-fgfw-1 and dc2-fgfw-1"
+      fortios_vpn_ipsec_phase1_interface:
+        state: present
+        vpn_ipsec_phase1_interface:
+          state: "present"
+          name: "dcivpn1"
+          remote_gw: "200.254.100.1"
+          interface: "port1"
+          ike_version: "1"
+          keylife: "28800"
+          peertype: "any"
+          proposal: "des-sha512"
+          dhgrp: "5"
+          psksecret: "password123"
+          wizard_type: "custom"
+          comments: "DCI_VPN"
+      when: inventory_hostname == "dc1-fgfw-1"
+      tags: phase1vpn
+
+    - name: "configuring IPSec Phase 2"
+      fortios_vpn_ipsec_phase2_interface:
+        vdom:  "{{ vdom }}"
+        state: "present"
+        vpn_ipsec_phase2_interface:
+          name: "dcivpn1"
+          phase1name: "dcivpn1"
+          src_subnet: "10.0.0.0/24"
+          src_port: 0
+          protocol: 0
+          dhgrp: 5
+          dst_subnet: "10.1.0.0/24"
+          dst_port: 0
+      when: inventory_hostname == "dc1-fgfw-1"
+      tags: phase2vpn
+
+    - name: "Configure and Establish IPsec VPN tunnel between dc2-fgfw-1 and dc1-fgfw-1"
+      fortios_vpn_ipsec_phase1_interface:
+        state: present
+        vpn_ipsec_phase1_interface:
+          state: "present"
+          name: "dcivpn1"
+          remote_gw: "200.254.100.2"
+          interface: "port1"
+          ike_version: "1"
+          keylife: "28800"
+          peertype: "any"
+          proposal: "des-sha512"
+          dhgrp: "5"
+          psksecret: "password123"
+          wizard_type: "custom"
+          comments: "DCI_VPN"
+      when: inventory_hostname == "dc2-fgfw-1"
+      tags: phase1vpn
+
+    - name: "configuring IPSec Phase 2 for dc2-fgfw-1"
+      fortios_vpn_ipsec_phase2_interface:
+        vdom:  "{{ vdom }}"
+        state: "present"
+        vpn_ipsec_phase2_interface:
+          name: "dcivpn1"
+          phase1name: "dcivpn1"
+          src_subnet: "10.1.0.0/24"
+          src_port: 0
+          protocol: 0
+          dhgrp: 5
+          dst_subnet: "10.0.0.0/24"
+          dst_port: 0
+      when: inventory_hostname == "dc2-fgfw-1"

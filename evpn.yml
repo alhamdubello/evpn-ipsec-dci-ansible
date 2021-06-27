@@ -1,0 +1,22 @@
+---
+- hosts: border
+  gather_facts: yes
+  tasks:
+    - name: "ensure hostname is configure"
+      nclu:
+        commands:
+          - add hostname {{ hostname }}
+        commit: true
+
+    - name: "configure loopback ip address"
+      nclu:
+        commands:
+          - add loopback lo ip address {{ loopback_ip }}/{{ loopback_sm }}
+        commit: true
+
+    - name: "configure link to firewall"
+      nclu:
+        commands:
+          - add interface {{ external_interface_firewall }} ip address {{ external_firewall_ip }}/{{ external_firewall_sm }}
+        commit: true
+

@@ -1,0 +1,8 @@
+---
+ansible_network_os: fortinet.fortios.fortios
+ansible_python_interpreter: /Users/belloau/Documents/terraform/projects/genomicsengland-ansible/bin/python
+connection: httpapi
+vdom: "root"
+ansible_httpapi_use_ssl: yes
+ansible_httpapi_validate_certs: no
+ansible_httpapi_port: 443

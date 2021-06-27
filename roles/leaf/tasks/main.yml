@@ -1,0 +1,174 @@
+---
+    - name: Add MLAG
+      import_tasks: mlag.yml
+      tags: mlag
+
+    - name: Adding system hostname and loopback ip.
+      nclu:
+        commands:
+          - add hostname "{{ hostname_sw }}"
+          - add loopback lo ip address "{{ loopback_ip }}"/32
+        atomic: true
+    - name: Configure interfaces uplink to spine
+      nclu:
+        commands:
+          - add interface swp1 alias UPLINK_TO_SPINE01
+          - add interface swp2 alias UPLINK_TO_SPINE02
+        commit: true
+    - name: Set MTU for interfaces UPLINK_TO_SPINE
+      nclu:
+        commands:
+          - add interface swp1-2 mtu 9216
+        commit: true
+    - name: Set IPv6 configuration on UPLINK_TO_SPINE
+      nclu:
+        commands:
+            - add interface swp1-2 ipv6 nd suppress-ra
+            - add interface swp1-2 ipv6 nd ra-interval 5
+        commit: true
+
+    - name: Adding Layer 3 VNI VLAN
+      nclu:
+        commands:
+            - add vrf "{{ item.name }}" vrf-table "{{ item.vrfid }}"
+            - add vlan {{ item.l3vni_vlan }} vlan-id {{ item.l3vni_vlan }}
+            - add bridge bridge vids {{ item.l3vni_vlan }}
+        commit: true
+      with_items:
+        - "{{  vrf_customer }}"
+      tags: vrf
+
+    - name: Adding Layer 3 VNI VxlAN
+      nclu:
+        commands:
+            - add vxlan {{ item.l3vni_name }} vxlan id {{ item.l3vni_id }}
+            - add vxlan {{ item.l3vni_name }} vxlan local-tunnelip {{ loopback_ip }}
+            - add vxlan {{ item.l3vni_name }} bridge access {{ item.l3vni_vlan }}
+            - add vxlan {{ item.l3vni_name }} mtu 9216
+        commit: true
+      with_items:
+          - "{{  vrf_customer }}"
+      tags: l3vni
+
+    - name: Adding Layer 3 VNI to VRF
+      nclu:
+        commands:
+            - add vlan {{ item.l3vni_vlan }} vrf {{ item.name }}
+            - add vrf {{ item.name }} vni {{ item.l3vni_id }}
+        commit: true
+      with_items:
+        - "{{  vrf_customer }}"
+      tags: vnivlan
+    - name: Adding Host VLAN's
+      nclu:
+        commands:
+             - add vlan {{ item.id }} alias {{ item.name }}
+             - add bridge bridge vids {{ item.id }}
+             - add vlan {{ item.id }} vrf {{ item.vrf }}
+        commit: true
+      with_items:
+        - "{{ vlan }}"
+      tags: hostvlan
+    - name: Adding Host VNI names id and vrf
+      nclu:
+        commands:
+           - add vxlan {{ item.name }} vxlan id {{ item.id }}
+           - add vxlan {{ item.name }} vxlan local-tunnelip {{ loopback_ip }}
+           - add vxlan {{ item.name }} bridge access {{ item.vid }}
+      with_items:
+        - "{{ vxlan }}"
+
+    - name: Adding SVI and Anycast IP for Hosts
+      nclu:
+        commands:
+           - add vlan {{ item.vid }} ip address-virtual 0a:67:0c:00:20:01 {{ item.gw }}
+        commit: true
+      with_items:
+        - "{{ vxlan }}"
+    - name: STP Optimization for VxLAN
+      nclu:
+        commands:
+           - add vxlan {{ item.name }} mtu 9216
+           - add vxlan {{ item.name }} bridge arp-nd-suppress on
+           - add vxlan {{ item.name }} bridge learning off
+           - add vxlan {{ item.name }} stp portbpdufilter
+           - add vxlan {{ item.name }} stp bpduguard
+        commit: true
+      with_items:
+        - "{{ vxlan }}"
+    - name: BGP Basic
+      nclu:
+        atomic: true
+        template: |
+             add bgp autonomous-system {{ asn }}
+             add bgp router-id {{ loopback_ip }}
+             add bgp bestpath as-path multipath-relax
+             add bgp maximum-paths 64
+             add bgp neighbor SPINES peer-group
+             add bgp neighbor SPINES remote-as external
+             add bgp neighbor SPINES capability extended-nexthop
+             {% for nei in neighbors %}
+             add bgp neighbor {{ nei }} interface peer-group SPINES
+             {% endfor %}
+             add bgp ipv4 unicast network {{ loopback_ip }}/32
+    - name: BGP EVPN
+      nclu:
+        commands:
+            - add bgp l2vpn evpn neighbor SPINES activate
+            - add bgp l2vpn evpn advertise-all-vni
+        commit: true
+
+    - name: Configuring Layer2 port to VDX
+      nclu:
+        commands:
+            - add interface {{ item.l2 }} bridge trunk
+        commit: true
+      with_items:
+        - "{{ vdx_evpn }}"
+      when: ansible_hostname == 'leaf3'
+
+    - name: Configuring Layer3 port to VDX
+      nclu:
+        commands:
+          - add vlan {{ item.vlnid }} ip address {{ item.ipaddrm }}
+          - add vlan {{ item.vlnid }} vrf {{ vrf_customer }}
+          - add vlan {{ item.vlnid }} mtu 9216
+          - add interface {{ item.l3 }} bridge access {{ item.vlnid }}
+          - add interface {{ item.l3 }} mtu 9216
+        commit: true
+      with_items:
+        - "{{ vdx_evpn }}"
+      when: ansible_hostname == 'leaf3'
+
+    - name: Adding VLAN OSPF Point-to-Point Network type.
+      nclu:
+        commands:
+           - add vlan {{ item.vlnid }} ospf network point-to-point
+        commit: true
+      with_items:
+        - "{{ vdx_evpn }}"
+      when: ansible_hostname == 'leaf3'
+    - name: Layer 3 connection to VDX
+      nclu:
+        commands:
+           - add ospf vrf {{ vrf_customer }}
+           - add ospf vrf {{ vrf_customer }} router-id {{ loopback_ip }}
+           - add ospf vrf {{ vrf_customer }} network {{ p2pnet }} area 0
+        commit: true
+      when: ansible_hostname == 'leaf3'
+    - name: Layer 3 BGP Redistribution from EVPN to VDX configuration
+      nclu:
+        commands:
+          - add bgp vrf {{ vrf_customer }} autonomous-system {{ asn }}
+          - add bgp vrf {{ vrf_customer }} router-id {{ loopback_ip }}
+          - add bgp vrf {{ vrf_customer }} ipv4 unicast redistribute connected
+          - add bgp vrf {{ vrf_customer }} ipv4 unicast redistribute ospf
+        commit: true
+      when: ansible_hostname == 'leaf3'
+
+    - name: Layer 3 OSPF Redistribution from VDX to EVPN configuration
+      nclu:
+        commands:
+          - add ospf vrf {{ vrf_customer }} redistribute bgp
+        commit: true
+      when: ansible_hostname == 'leaf3'

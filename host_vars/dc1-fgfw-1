@@ -1,0 +1,29 @@
+---
+#variable to describe Datacenter site.
+dc_site: dc1
+ansible_host: 192.168.0.109
+ansible_user: "admin"
+ansible_password: "password@1"
+username: admin
+password: password@1
+vdom: "root"
+ssl_verify: "False"
+
+#### Configuration Variables
+wan_dci_description: DCI WAN LINK
+wan_dci_ip: 200.254.100.1
+wan_dci_sm: 24
+wan_dci_port: port1
+wan_allowaccess:
+  - ping
+  - ssh
+  - http
+  - https
+
+border_dc_description: Border Leaf
+border_dc_ip: 10.0.0.99
+border_dc_sm: 24
+border_dc_port: port2
+border_allowaccess:
+  - ping
+  - ssh

@@ -1,0 +1,11 @@
+---
+hostname: dc1-border-1
+loopback_ip: 10.0.0.5
+loopback_sm: 32
+external_interface_firewall: swp1
+external_firewall_ip: 10.0.0.100
+external_firewall_sm: 24
+uplinks_to_spines:
+  - swp2
+  - swp3
+bgp_asn: 65005
