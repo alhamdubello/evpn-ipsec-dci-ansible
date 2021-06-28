@@ -2,17 +2,13 @@
 - hosts: border
   gather_facts: yes
   tasks:
-    - name: "ensure hostname is configure"
-      nclu:
-        commands:
-          - add hostname {{ hostname }}
-        commit: true
+    - name: "ensure logging and ntp is configured"
+      include_role:
+        name: common
 
-    - name: "configure loopback ip address"
-      nclu:
-        commands:
-          - add loopback lo ip address {{ loopback_ip }}/{{ loopback_sm }}
-        commit: true
+    - name: "setting up the broder switches with roles exit"
+      include_role:
+        name: exit
 
     - name: "configure link to firewall"
       nclu:

@@ -2,4 +2,5 @@
 - hosts: spines
   gather_facts: true
   roles:
+    - common
     - spine
