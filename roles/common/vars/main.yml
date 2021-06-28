@@ -11,12 +11,12 @@ defaultntp:
   - 3.cumulusnetworks.pool.ntp.org
 
 ntpservers:
- - 0.bham.ntp.org
- - 1.bham.ntp.org
- - 2.bham.ntp.org
- - 3.bham.ntp.org
+ - 0.home.ntp.org
+ - 1.home.ntp.org
+ - 2.home.ntp.org
+ - 3.home.ntp.org
 
 syslogservers:
-  - 10.20.0.50
-  - 10.20.0.51
-  - 10.20.0.52
+  - 10.0.0.1
+  - 10.0.0.2
+  - 10.0.0.3
